@@ -1,0 +1,63 @@
+---
+title: "Squirrels"
+author: "Lorena Almaraz"
+date: "15/03/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(shiny)
+library(tidyverse)
+library(tidytuesdayR)
+library(rsconnect)
+
+squirrels <- tidytuesdayR::tt_load('2019-10-29')
+nyc_squirrels <- squirrels$nyc_squirrels
+
+# Define UI for application that draws a histogram
+ui <- fluidPage(
+
+    # Application title
+    titlePanel("nyc_squirrels data"),
+
+    # Sidebar with a slider input for number of bins 
+    sidebarLayout(
+        sidebarPanel(
+            sliderInput("slider",
+                        "Police Precincts:",
+                        min = 10,
+                        max = 15,
+                        value = 1)
+        ),
+
+        # Show a plot of the generated distribution
+        mainPanel(
+           plotOutput("distPlot")
+        )
+    )
+)
+
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+
+    output$distPlot <- renderPlot({
+
+        nyc_squirrels %>% 
+            filter(!is.na(primary_fur_color)) %>%
+            filter(police_precincts > input$slider) %>% 
+            ggplot(aes(x = police_precincts, fill = primary_fur_color)) + 
+            theme_minimal() + 
+            geom_bar() +
+            labs(x = "Police Precinct",
+                 y = "Count") +
+        ylim(0,120)
+        
+    })
+}
+
+# Run the application 
+shinyApp(ui = ui, server = server)
+
+rsconnect::deployApp('/Users/lorenaalmaraz/Documents/Education & Learning/U of T/Course Materials/2 2021 Winter/INF2178 Experimental Design for DS/Week 8/Squirrels/squirrels.Rmd')
+```
